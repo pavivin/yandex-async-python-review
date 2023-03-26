@@ -11,67 +11,63 @@ def coroutine(f):
         gen = f(*args, **kwargs)
         gen.send(None)
         return gen
-    return wrap
 
+    return wrap
 
 def get_and_write_data(condition, url):
     context = ssl._create_unverified_context()
-    file = 'punchline.txt'
+    file = "punchline.txt"
     with condition:
         with urlopen(url, context=context) as req:
             resp = req.read().decode("utf-8")
             resp = json.loads(resp)
         if req.status != 200:
             raise Exception(
-                "Error during execute request. {}: {}".format(
-                    resp.status, resp.reason
-                )
+                "Error during execute request. {}: {}".format(resp.status, resp.reason)
             )
         data = resp
         if isinstance(data, dict):
             path = Path(file)
-            setup = data['setup']
-            punchline = data['punchline']
-            print(
-                f'Setup: {setup} \n'
-                f'Punchline: {punchline}'
-            )
-            with open(path, mode='a') as config:
+            setup = data["setup"]
+            punchline = data["punchline"]
+            print(f"Setup: {setup} \n" f"Punchline: {punchline}")
+            with open(path, mode="a") as config:
                 config.write(str(data))
         else:
-            logger.error(type(data))
-            logger.error(ValueError)
+            print(type(data))
+            print(ValueError)
             raise ValueError
 
+
 def copy_file(condition, x=None):
-    file = 'punchline.txt' # файл не создан / не приложен к задаче
-    to_path = 'jokes'
+    file = "punchline.txt"
+    to_path = "jokes"
     with condition:
         condition.wait(timeout=1)
         try:
             shutil.copy(file, to_path)
         except FileNotFoundError as ex:
-            logger.error('Файл не найден %s', ex)
+            print("Файл не найден %s", ex)
 
 
 def delete_file(condition, x=None):
-    file = 'punchline.txt'
+    file = "punchline.txt"
     obj = Path(file)
     with condition:
         condition.wait(timeout=1)
         try:
             obj.unlink()
-            logger.info('Удалил файл')
+            print("Удалил файл")
         except FileNotFoundError as ex:
-            logger.error(ex)
+            print(ex)
 
 
 class Job:
     def __init__(
-            self,
-            func=None,
-            name=None,
-            args=None,
+        self,
+        func=None,
+        name=None,
+        args=None,
     ):
         self.args = args
         self.name = name
@@ -79,6 +75,6 @@ class Job:
 
     def run(self, *args):
         tar = self.func(*args)
-        logger.info('тип объекта в Job.run %s', type(tar))
-        logger.debug('запуск объекта %s', tar)
+        print("тип объекта в Job.run %s", type(tar))
+        print("запуск объекта %s", tar)
         return tar

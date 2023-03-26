@@ -17,7 +17,7 @@ def coroutine(f):
     return wrap
 
 
-class Scheduler(object): # с 3 версии Python не нужно наследовать от класса
+class Scheduler(object):
     def __init__(
         self,
         max_working_time=1,
@@ -25,21 +25,21 @@ class Scheduler(object): # с 3 версии Python не нужно наслед
         dependencies=(),
         start_at=None,
     ):
-        super().__init__() # лишнее действие
+        super().__init__()
         self.task_list: list[Job] = []
         self.start_at = start_at
         self.max_working_time = max_working_time
         self.tries = tries
         self.dependencies = dependencies if dependencies is not None else None
 
-    @coroutine # здесь не надо использовать coroutine, @coroutine надо добавить на Job
+    @coroutine
     def schedule(self):
         processes = []
         while True:
-            task_list = yield # task_list явно можно получать из функции
-            print(task_list)
+            task_list = yield
+            print(task_list, flush=True)
             for task in task_list:
-                logger.info(f"Планировщик: запускаю задачу - {task.name}")
+                print(f"Планировщик: запускаю задачу - {task.name}")
                 p = multiprocessing.Process(
                     target=task.run,
                     args=(condition, url),
@@ -47,9 +47,9 @@ class Scheduler(object): # с 3 версии Python не нужно наслед
                 p.start()
                 processes.append(p)
             for process in processes:
-                logger.info(process)
+                print(process, flush=True)
                 process.join()
-                logger.info(f" process {process} stopped!")
+                print(f" process {process} stopped!", flush=True)
 
     def run(self, jobs: tuple):
         gen = self.schedule()
